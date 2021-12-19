@@ -1,5 +1,5 @@
 # Deferred Neural Rendering Training
-![Pipeline](pipeline.png)
+![Pipeline](./pipeline.png)
 
 Once the data is preprocessed, we can now train the model and infer from it. Instructions are given below:
 

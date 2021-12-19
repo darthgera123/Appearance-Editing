@@ -1,5 +1,5 @@
 # Independent Estimation Training
-![Pipeline](pipeline.png)
+![Pipeline](./pipeline.png)
 
 
 Once the data is preprocessed, we can now train the model and infer from it. Note you must have the diffuse texture optimized already for this to work. Instructions are given below:
