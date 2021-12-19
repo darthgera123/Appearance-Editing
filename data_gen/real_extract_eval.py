@@ -1,0 +1,131 @@
+import torch, os, sys, cv2, json, argparse, random, glob, struct, math, time
+import torch.nn as nn
+from torch.nn import init
+import functools
+import torch.optim as optim
+
+from torch.utils.data import Dataset, DataLoader
+from torch.nn import functional as func
+from PIL import Image
+
+import scipy.ndimage as ndimage
+import torchvision.transforms as transforms
+import numpy as np 
+import os.path as osp
+
+import sh
+from utils import *
+from poses.read_model import camera_pose
+
+import pyexr
+
+import enoki as ek
+import mitsuba
+mitsuba.set_variant('gpu_rgb')
+
+from mitsuba.core import Vector3f, Float, Float32, Float64, Thread, xml, Spectrum, depolarize, RayDifferential3f, Frame3f, warp, Bitmap, Struct
+from mitsuba.core import math as m_math
+from mitsuba.core.xml import load_string, load_file
+from mitsuba.render import BSDF, Emitter, BSDFContext, BSDFSample3f, SurfaceInteraction3f, ImageBlock, register_integrator, register_bsdf, MonteCarloIntegrator, SamplingIntegrator, has_flag, BSDFFlags, DirectionSample3f
+
+from mitsuba.python.autodiff import render
+
+def process(args, i, img_path, output_dir):
+    img_path = img_path.replace('\n', '')
+    img_name = img_path.split('/')[-1]
+    identifier = img_name.replace('.png', '').replace('.jpg', '').replace('.JPG', '').replace('image', '')
+
+    gt = load_image('%s/%s' % (args.data_dir, img_name), (args.img_width, args.img_height))
+    mask = load_image('%s/%s.png' % (args.data_mask_dir, identifier), (args.img_width, args.img_height))
+    gt = gt * mask
+
+    p, focal_length, og_width, og_height = camera_pose('%s/' % (args.colmap_dir), img_path, 'new_sparse')
+    pose = ' '.join([str(elem) for elem in p])
+
+    estimated_f = math.sqrt( pow(args.sensor_width, 2) + pow(args.sensor_height, 2) ) * focal_length / math.sqrt( pow(og_width, 2) + pow(og_height, 2) )
+    focal_length = estimated_f * 34.6 / 6.4
+
+    tx = p[3]
+    ty = p[7]
+    tz = p[11]
+
+    scene_forward = load_file(args.scene_file, integrator='direct', focal_length=str(focal_length)+'mm', poses=pose, envmap_pose=pose, \
+                        spp=8, width=args.img_width, height=args.img_height)
+                        
+    scene_forward.integrator().render(scene_forward, scene_forward.sensors()[0])
+    film_forward = scene_forward.sensors()[0].film()
+    img = film_forward.bitmap(raw=True).convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True)
+    img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+    # BRDF SH
+    scene = load_file(args.scene_file, integrator='auxintegrator', focal_length=str(focal_length)+'mm', poses=pose, envmap_pose=pose, \
+                        spp=8, width=args.img_width, height=args.img_height)
+
+    rendered_op = render(scene, spp=1)
+    rendered_op = rendered_op.numpy().reshape(IMG_HEIGHT, IMG_WIDTH, 11, 3)
+
+    f_sh = rendered_op[:, :, 1:, :]
+    f_sh = f_sh.reshape(IMG_HEIGHT, IMG_WIDTH, -1)
+    
+    uv = rendered_op[:, :, 0, :]
+
+    uv_png = uv.copy()
+    uv_png *= 255.0
+    uv_png = uv_png.astype(np.uint8)
+
+    gt = np.clip(gt, 0, 1)**(1.0/2.2)
+    gt *= 255.0
+    gt = gt.astype(np.uint8)
+
+    mask = np.clip(mask, 0, 1)
+    mask *= 255.0
+    mask = mask.astype(np.uint8)
+
+    cv2.imwrite('%s/forward/%s.png' % (output_dir, identifier), img)
+    cv2.imwrite('%s/frames/%s.png' % (output_dir, identifier), cv2.cvtColor(gt, cv2.COLOR_RGB2BGR))
+    cv2.imwrite('%s/mask/%s.png' % (output_dir, identifier), mask)
+    np.save('%s/uv/%s.npy' % (output_dir, identifier), uv)
+    cv2.imwrite('%s/uv_png/%s.png' % (output_dir, identifier), cv2.cvtColor(uv_png, cv2.COLOR_RGB2BGR))
+    np.save('%s/extrinsics/%s.npy' % (output_dir, identifier), np.array([tx, ty, tz], dtype=np.float))
+    np.save('%s/sh/%s.npy' % (output_dir, identifier), f_sh)
+
+    del rendered_op
+    del uv
+    del scene
+
+    ek.cuda_malloc_trim()
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--scene_file', type=str, default='pinecone_dr.xml')
+    parser.add_argument('--data_dir', type=str, default='./', help='')
+    parser.add_argument('--data_mask_dir', type=str, default='./', help='')
+    parser.add_argument('--colmap_dir', type=str, default='./', help='')
+    parser.add_argument('--output_dir', type=str, default='./', help='')
+    parser.add_argument('--image_list_txt', type=str, default='./', help='')
+    parser.add_argument('--sensor_width', type=float, default=6.4) # Sensor width in mm, default for ROG phone 2
+    parser.add_argument('--sensor_height', type=float, default=4.8) # Sensor height in mm, default for ROG phone 2
+    parser.add_argument('--img_width', type=int, default=512)
+    parser.add_argument('--img_height', type=int, default=512)
+
+    args = parser.parse_args()
+
+    IMG_WIDTH = args.img_width
+    IMG_HEIGHT = args.img_height
+    register_integrator('auxintegrator', lambda props: sh.AuxIntegrator(props))
+    register_integrator('envintegrator', lambda props: sh.EnvIntegrator(props))
+
+    Thread.thread().file_resolver().append(os.path.dirname(args.scene_file))
+
+    # img_list_file = sorted(open(args.image_list_txt, 'r'))[99:200]
+    img_list_file = sorted(open(args.image_list_txt, 'r'))
+    img_list = []
+    for idx, l in enumerate(img_list_file):
+        # if '00108' in l or '00000' in l or '00075' in l:
+        #     img_list.append(l)
+        img_list.append(l)
+
+    for i, img_path in enumerate(img_list):
+        process(args, i, img_path, args.output_dir)
+    

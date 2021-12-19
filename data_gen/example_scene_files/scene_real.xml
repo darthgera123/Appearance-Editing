@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<scene version="2.2.1">
+    <integrator type="$integrator">
+		<boolean name="hide_emitters" value="true"/>
+    </integrator>
+    
+    <sensor type="perspective" id="camera"> 
+        <string name="focal_length" value="$focal_length"/>
+        <transform name="to_world">
+            <matrix value="$poses"/>
+        </transform>
+        
+        <sampler type="independent">
+            <integer name="sample_count" value="$spp"/>
+        </sampler>
+        
+        <film type="hdrfilm" id="film">
+            <integer name="width" value="$width"/>
+            <integer name="height" value="$height"/>
+            <string name="pixel_format" value="rgb"/>
+        </film>
+    </sensor>
+
+    <emitter type="envmap" id="emitter-envmap">
+        <string name="filename" value="B,Diff,Cm/envmap.JPG" />
+    </emitter>
+    
+    <shape version="2.2.1" type="ply" id="obj_1">
+        <string name="filename" value="triangulated.ply"/>
+
+        <bsdf type="diffuse">
+            <texture name="reflectance" type="bitmap">
+                <string name="filename" value="optimized_textures/diffuse_opt.exr"/>
+            </texture>
+        </bsdf>
+
+    </shape>
+
+</scene>
