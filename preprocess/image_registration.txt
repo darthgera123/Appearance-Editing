@@ -1,0 +1,20 @@
+To perform image registration do the following
+1) Create a vocab tree by running: colmap vocab_tree_builder --database_path colmap_output/database.db --vocab_tree_path colmap_output/vocab.bin
+Note: vocab.bin is some empty file
+2) Create image-list.txt with paths of all new images and the path should be w.r.t images folder
+3) Run colmap feature_extractor \
+    --database_path $PROJECT_PATH/database.db \
+    --image_path $PROJECT_PATH/images \
+    --image_list_path /path/to/image-list.txt
+4) Run colmap vocab_tree_matcher \
+    --database_path $PROJECT_PATH/database.db \
+    --VocabTreeMatching.vocab_tree_path /path/to/vocab-tree.bin \
+    --VocabTreeMatching.match_list_path /path/to/image-list.txt
+5) Run colmap image_registrator \
+    --database_path $PROJECT_PATH/database.db \
+    --input_path /path/to/existing-model \
+    --output_path /path/to/model-with-new-images
+6) colmap bundle_adjuster \
+    --input_path /path/to/model-with-new-images \
+    --output_path /path/to/model-with-new-images
+Last step is optional
