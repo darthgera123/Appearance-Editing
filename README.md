@@ -30,10 +30,8 @@
 ## Prerequisites
 This code was tested on UBuntu 20.04, with Python 3.8. For running the code we used `pytorch 3.8`. Please check `requirements.txt` for other dependencies<br>
 
-## Curating the Data
-Checkout [`data_gen`](./data_gen) for instructions on how to generate synthetic data.
 ## Preprocess the Data
-Checkout [`preprocess`](./preprocess) for instructions on how to preprocess captured real data.
+Checkout [`preprocess`](./preprocess) for instructions on how to generate and preprocess the data.
 ## Running code
 + [`DNR`](./DNR) for instructions on how to run DNR code.
 + [`Independent`](./Independent) for instructions on how to run code with independent optimization.
