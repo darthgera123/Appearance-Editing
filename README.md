@@ -1,5 +1,5 @@
-<h1 align="center">A Flexible Neural Renderer for Material Visualization</h1>
-<p align="center"><b>ArXiv</b></p>
+<h1 align="center">Neural View Synthesis and Appearance Editing from Unstructured Images</h1>
+<p align="center"><b>Indian Conference on Computer Vision, Graphics and Image Processing</b></p>
 <div align="center">
   <span>
     <a href="https://darthgera123.github.io/">Pulkit Gera<sup>1</sup></a>,
@@ -10,13 +10,13 @@
 </div>
 <p align="center"><sup>1</sup>CVIT, IIIT Hyderabad</p>
 <hr>
-<img src="main.png" width="900px" height="319px">
+<img src="main.png" width="900px" height="450px">
 <div align="center">
   <span>
     <a href="https://darthgera.github.io/publications/appearance-editing">[Project page]</a>
     <a href="https://dl.acm.org/doi/abs/10.1145/3490035.3490299">[Paper]</a>
     <a href="https://youtu.be/ZCVQj5FK0C4">[Video]</a>
-    <a href="">[bibtex]</a>
+    <a href="./bibtex.txt">[bibtex]</a>
   </span>
 </div>
 <hr>
@@ -28,21 +28,16 @@
 
 # Code Instructions
 ## Prerequisites
-This code was tested on UBuntu 20.04, with Python 3.8. <br>
-
-<p><b>Python 3.8 dependencies:</b><br>
-torch-1.7.0 (pytorch)<br>
-torchvision-0.0.9<br>
-pillow-5.1.0<br>
-numpy-1.13.3<br>
-opencv-python-4.1.0.25<br>
-</p>
+This code was tested on UBuntu 20.04, with Python 3.8. For running the code we used `pytorch 3.8`. Please check `requirements.txt` for other dependencies<br>
 
 ## Curating the Data
-Check data_gen
+Checkout [`data_gen`](./data_gen) for instructions on how to generate synthetic data.
 ## Preprocess the Data
-Check preprocess
+Checkout [`preprocess`](./preprocess) for instructions on how to preprocess captured real data.
 ## Running code
++ [`DNR`](./DNR) for instructions on how to run DNR code.
++ [`Independent`](./Independent) for instructions on how to run code with independent optimization.
++ [`Joint`](./Joint) for instructions on how to run code with joint optimization.
 
 ## Training Data
 Contact the authors for Training Data. The 4 datasets : Woman, Plants, Fish and Cushion will be made available soon.
