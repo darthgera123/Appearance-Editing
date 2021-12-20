@@ -13,7 +13,7 @@
 <img src="main.png" width="900px" height="450px">
 <div align="center">
   <span>
-    <a href="https://darthgera.github.io/publications/appearance-editing">[Project page]</a>
+    <a href="https://darthgera.github.io/appearance-editing">[Project page]</a>
     <a href="https://dl.acm.org/doi/abs/10.1145/3490035.3490299">[Paper]</a>
     <a href="https://youtu.be/ZCVQj5FK0C4">[Video]</a>
     <a href="./bibtex.txt">[bibtex]</a>
