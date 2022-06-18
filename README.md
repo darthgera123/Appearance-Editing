@@ -16,6 +16,7 @@
     <a href="https://darthgera.github.io/appearance-editing">[Project page]</a>
     <a href="https://dl.acm.org/doi/abs/10.1145/3490035.3490299">[Paper]</a>
     <a href="https://youtu.be/ZCVQj5FK0C4">[Video]</a>
+    <a href="https://drive.google.com/file/d/1ky5SRtuPfOxxXgXGkKbhYgpgN-chzWq0/view?usp=sharing">[Data]</a>
     <a href="./bibtex.txt">[bibtex]</a>
   </span>
 </div>
