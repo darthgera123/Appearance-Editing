@@ -10,7 +10,7 @@
 </div>
 <p align="center"><sup>1</sup>CVIT, IIIT Hyderabad</p>
 <hr>
-<img src="main.png" width="900px" height="450px">
+<img src="main.png" width="900px" height="450px" class='center'>
 <div align="center">
   <span>
     <a href="https://darthgera.github.io/appearance-editing">[Project page]</a>
