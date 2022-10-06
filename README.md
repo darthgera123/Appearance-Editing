@@ -38,5 +38,4 @@ Checkout [`preprocess`](./preprocess) for instructions on how to generate and pr
 + [`Independent`](./Independent) for instructions on how to run code with independent optimization.
 + [`Joint`](./Joint) for instructions on how to run code with joint optimization.
 
-## Training Data
-Contact the authors for Training Data. The 4 datasets : Woman, Plants, Fish and Cushion will be made available soon.
+
